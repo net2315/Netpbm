@@ -13,10 +13,10 @@ type PBM struct {
 
 // ReadPBM reads a PBM image from a file and returns a struct that represents the image.
 func ReadPBM(filename string) (*PBM, error) {
-	file_data, err := os.ReadFile(filename)
+	path := "./" + filename
+	_, err := os.ReadFile(path)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(file_data)
 	
 }
