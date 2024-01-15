@@ -1,4 +1,4 @@
-package Netpbm
+package main
 
 import (
 	"bufio"
@@ -14,7 +14,7 @@ type PBM struct {
 	magicNumber   string
 }
 
-func main()  {
+func main() {
 	ReadPBM("test1.pbm")
 }
 
@@ -30,41 +30,45 @@ func ReadPBM(filename string) (*PBM, error) {
 
 	//Scanner le texte + conditions
 	scanner := bufio.NewScanner(file)
-	input := scanner.Text()
 	confirmOne := false
 	confirmTwo := false
+	Line := 0
 
 	for scanner.Scan() {
-		if strings.HasPrefix(input, "#") {
+		if strings.HasPrefix(scanner.Text(), "#") {
 			continue
 		} else if !confirmOne {
-			PBMstock.magicNumber = input
+			PBMstock.magicNumber = scanner.Text()
 			confirmOne = true
-		} else if confirmTwo {
-			sepa := strings.Fields(input)
-			if len(sepa)>2 {
-			width, errW := strconv.Atoi(sepa[0])
-			height, errH := strconv.Atoi(sepa[1])
-			if errW != nil || errH != nil {
-				return nil, fmt.Errorf("Erreur de conversion de largeur/hauteur: %v, %v", errW, errH)
+		} else if !confirmTwo {
+			sepa := strings.Fields(scanner.Text())
+			if len(sepa) > 0 {
+				PBMstock.width, _ = strconv.Atoi(sepa[0])
+				PBMstock.height, _ = strconv.Atoi(sepa[1])
 			}
-			PBMstock.width = width
-			PBMstock.height = height
 			confirmTwo = true
+
+			PBMstock.data = make(([][] bool), PBMstock.height)
+			for i := range PBMstock.data {
+				PBMstock.data[i] = make(([]bool), PBMstock.width)
 			}
-		} 
-		if PBMstock.magicNumber == "P1" {
-			for i := 0; i < PBMstock.width; i++ {
-				for j := 1; j < PBMstock.height; j++ {
-					if PBMstock.data[i][j] == true {
-						fmt.Println("true")
+
+		} else {
+
+			if PBMstock.magicNumber == "P1" {
+				test := strings.Fields(scanner.Text())
+				for i := 0; i < PBMstock.width; i++ {
+					if test[i] == "1" {
+						PBMstock.data[Line][i] = true
 					} else {
-						fmt.Println("false")
+						PBMstock.data[Line][i] = false
 					}
 				}
+				Line++
 			}
 		}
 	}
+
 	fmt.Printf("%v\n", PBMstock)
-	return &PBM{PBMstock.data,PBMstock.height,PBMstock.width,PBMstock.magicNumber}, err
+	return &PBM{PBMstock.data, PBMstock.height, PBMstock.width, PBMstock.magicNumber}, err
 }
