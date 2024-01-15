@@ -145,15 +145,15 @@ func TestSize(t *testing.T) {
 	}
 }
 
-// func TestAt(t *testing.T) {
-// 	pbm, err := ReadPBM("./testImages/pbm/testP1.pbm")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	if pbm.At(0, 8) != true {
-// 		t.Error("Wrong value")
-// 	}
-// }
+func TestAt(t *testing.T) {
+	pbm, err := ReadPBM("./testImages/pbm/testP1.pbm")
+	if err != nil {
+		t.Error(err)
+	}
+	if pbm.At(0, 8) != true {
+		t.Error("Wrong value")
+	}
+}
 
 // func TestSet(t *testing.T) {
 // 	pbm, err := ReadPBM("./testImages/pbm/testP1.pbm")

@@ -76,4 +76,9 @@ func (pbm *PBM) Size() (int, int) {
 	return pbm.height, pbm.width
 }
 
+// At retourne la valeur de chaque pixel en (x, y).
+func (pbm *PBM) At(x, y int) bool{
+	return pbm.data[x][y]
+}
+
 
