@@ -81,4 +81,12 @@ func (pbm *PBM) At(x, y int) bool{
 	return pbm.data[x][y]
 }
 
+// Set défini la valeur de chaque pixel à (x, y).
+func (pbm *PBM) Set(x, y int, value bool){
+	pbm.data[x][y] = value 
+}
 
+// Save saves the PBM image to a file and returns an error if there was a problem.
+func (pbm *PBM) Save(filename string) error{
+    
+}

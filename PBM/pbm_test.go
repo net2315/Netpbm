@@ -155,83 +155,83 @@ func TestAt(t *testing.T) {
 	}
 }
 
-// func TestSet(t *testing.T) {
-// 	pbm, err := ReadPBM("./testImages/pbm/testP1.pbm")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	pbm.Set(1, 3, true)
-// 	if pbm.At(1, 3) != true {
-// 		t.Error("Wrong value")
-// 	}
-// }
+func TestSet(t *testing.T) {
+	pbm, err := ReadPBM("./testImages/pbm/testP1.pbm")
+	if err != nil {
+		t.Error(err)
+	}
+	pbm.Set(1, 3, true)
+	if pbm.At(1, 3) != true {
+		t.Error("Wrong value")
+	}
+}
 
-// func TestSave(t *testing.T) {
-// 	pbm, err := ReadPBM("./testImages/pbm/testP1.pbm")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	pbm.SetMagicNumber("P1")
-// 	pbm.Save("./testImages/pbm/testP1Save.pbm")
-// 	pbm2, err := ReadPBM("./testImages/pbm/testP1Save.pbm")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	if pbm2.magicNumber != "P1" {
-// 		t.Error("Wrong magic number")
-// 	}
-// 	if pbm2.width != 15 {
-// 		t.Error("Wrong width")
-// 	}
-// 	if pbm2.height != 15 {
-// 		t.Error("Wrong height")
-// 	}
-// 	// compare the data
-// 	for i := 0; i < imageWidth*imageHeight; i++ {
-// 		var x int = i % imageWidth
-// 		var y int = i / imageWidth
-// 		if pbm2.data[y][x] != imageDataP1[i] {
-// 			t.Error("Wrong data")
-// 		}
-// 	}
+func TestSave(t *testing.T) {
+	pbm, err := ReadPBM("./testImages/pbm/testP1.pbm")
+	if err != nil {
+		t.Error(err)
+	}
+	pbm.SetMagicNumber("P1")
+	pbm.Save("./testImages/pbm/testP1Save.pbm")
+	pbm2, err := ReadPBM("./testImages/pbm/testP1Save.pbm")
+	if err != nil {
+		t.Error(err)
+	}
+	if pbm2.magicNumber != "P1" {
+		t.Error("Wrong magic number")
+	}
+	if pbm2.width != 15 {
+		t.Error("Wrong width")
+	}
+	if pbm2.height != 15 {
+		t.Error("Wrong height")
+	}
+	// compare the data
+	for i := 0; i < imageWidth*imageHeight; i++ {
+		var x int = i % imageWidth
+		var y int = i / imageWidth
+		if pbm2.data[y][x] != imageDataP1[i] {
+			t.Error("Wrong data")
+		}
+	}
 
-// 	pbm, err = ReadPBM("./testImages/pbm/testP4.pbm")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	pbm.SetMagicNumber("P4")
-// 	pbm.Save("./testImages/pbm/testP4Save.pbm")
-// 	pbm2, err = ReadPBM("./testImages/pbm/testP4Save.pbm")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	if pbm2.magicNumber != "P4" {
-// 		t.Error("Wrong magic number")
-// 	}
-// 	if pbm2.width != 15 {
-// 		t.Error("Wrong width")
-// 	}
-// 	if pbm2.height != 15 {
-// 		t.Error("Wrong height")
-// 	}
-// 	// compare the data
-// 	for i := 0; i < imageWidth*imageHeight; i++ {
-// 		var x int = i % imageWidth
-// 		var y int = i / imageWidth
-// 		if pbm2.data[y][x] != imageDataP1[i] {
-// 			t.Error("Wrong data")
-// 		}
-// 	}
-// 	// remove the test files
-// 	err = os.Remove("./testImages/pbm/testP1Save.pbm")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	err = os.Remove("./testImages/pbm/testP4Save.pbm")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// }
+	pbm, err = ReadPBM("./testImages/pbm/testP4.pbm")
+	if err != nil {
+		t.Error(err)
+	}
+	pbm.SetMagicNumber("P4")
+	pbm.Save("./testImages/pbm/testP4Save.pbm")
+	pbm2, err = ReadPBM("./testImages/pbm/testP4Save.pbm")
+	if err != nil {
+		t.Error(err)
+	}
+	if pbm2.magicNumber != "P4" {
+		t.Error("Wrong magic number")
+	}
+	if pbm2.width != 15 {
+		t.Error("Wrong width")
+	}
+	if pbm2.height != 15 {
+		t.Error("Wrong height")
+	}
+	// compare the data
+	for i := 0; i < imageWidth*imageHeight; i++ {
+		var x int = i % imageWidth
+		var y int = i / imageWidth
+		if pbm2.data[y][x] != imageDataP1[i] {
+			t.Error("Wrong data")
+		}
+	}
+	// remove the test files
+	err = os.Remove("./testImages/pbm/testP1Save.pbm")
+	if err != nil {
+		t.Error(err)
+	}
+	err = os.Remove("./testImages/pbm/testP4Save.pbm")
+	if err != nil {
+		t.Error(err)
+	}
+}
 
 // func TestInvert(t *testing.T) {
 // 	pbm, err := ReadPBM("./testImages/pbm/testP1.pbm")
