@@ -17,7 +17,7 @@ type PBM struct {
 
 // ReadPBM lie l'image PBM du fichier et retourne dans la struct avec les infos de l'image.
 func ReadPBM(filename string) (*PBM, error) {
-	PBMstock := PBM{}
+	pbm := PBM{}
 
 	// Ouverture du fichier
 	file, err := os.Open(filename)
@@ -38,37 +38,37 @@ func ReadPBM(filename string) (*PBM, error) {
 		if strings.HasPrefix(scanner.Text(), "#") {
 			continue
 		} else if !confirmOne { // Prendre en compte le P1 ou P4
-			PBMstock.magicNumber = scanner.Text()
+			pbm.magicNumber = scanner.Text()
 			confirmOne = true
 		} else if !confirmTwo { // Prendre en compte la taille de l'image
 			sepa := strings.Fields(scanner.Text())
 			if len(sepa) > 0 {
-				PBMstock.width, _ = strconv.Atoi(sepa[0])
-				PBMstock.height, _ = strconv.Atoi(sepa[1])
+				pbm.width, _ = strconv.Atoi(sepa[0])
+				pbm.height, _ = strconv.Atoi(sepa[1])
 			}
 			confirmTwo = true
 
-			PBMstock.data = make(([][]bool), PBMstock.height) // Création de la matrice pour le data en prenant en compte la taille
-			for i := range PBMstock.data {
-				PBMstock.data[i] = make(([]bool), PBMstock.width)
+			pbm.data = make(([][]bool), pbm.height) // Création de la matrice pour le data en prenant en compte la taille
+			for i := range pbm.data {
+				pbm.data[i] = make(([]bool), pbm.width)
 			}
 
 		} else {
 
-			if PBMstock.magicNumber == "P1" { // Pour le P1 rendre les 0 en false et les 1 en true
+			if pbm.magicNumber == "P1" { 				// Pour le P1 rendre les 0 en false et les 1 en true
 				test := strings.Fields(scanner.Text())
-				for i := 0; i < PBMstock.width; i++ {
+				for i := 0; i < pbm.width; i++ {
 					if test[i] == "1" {
-						PBMstock.data[Line][i] = true
+						pbm.data[Line][i] = true
 					} else {
-						PBMstock.data[Line][i] = false
+						pbm.data[Line][i] = false
 					}
 				}
 				Line++
-			}else if PBMstock.magicNumber == "P4" {
+			}else if pbm.magicNumber == "P4" {
 				// Read P4 format (binary)
-				expectedBytesPerRow := (PBMstock.width + 7) / 8
-				for y := 0; y < PBMstock.height; y++ {
+				expectedBytesPerRow := (pbm.width + 7) / 8
+				for y := 0; y < pbm.height; y++ {
 					row := make([]byte, expectedBytesPerRow)
 					n, err := reader.Read(row)
 					if err != nil {
@@ -81,7 +81,7 @@ func ReadPBM(filename string) (*PBM, error) {
 						return nil, fmt.Errorf("unexpected end of file at row %d, expected %d bytes, got %d", y, expectedBytesPerRow, n)
 					}
 		
-					for x := 0; x < PBMstock.width; x++ {
+					for x := 0; x < pbm.width; x++ {
 						byteIndex := x / 8
 						bitIndex := 7 - (x % 8)
 		
@@ -89,15 +89,15 @@ func ReadPBM(filename string) (*PBM, error) {
 						decimalValue := int(row[byteIndex])
 						bitValue := (decimalValue >> bitIndex) & 1
 		
-						PBMstock.data[y][x] = bitValue != 0
+						pbm.data[y][x] = bitValue != 0
 					}
 				}
 			}
 		}
 	}
 
-	fmt.Printf("%v\n", PBMstock)
-	return &PBM{PBMstock.data, PBMstock.height, PBMstock.width, PBMstock.magicNumber}, err // Retourner la struct en entiere
+	fmt.Printf("%v\n", pbm)
+	return &PBM{pbm.data, pbm.height, pbm.width, pbm.magicNumber}, err // Retourner la struct en entiere
 }
 
 // Size retourne la hauteur et la largeur de l'image.
@@ -166,4 +166,13 @@ func (pbm *PBM) Save(filename string) error {
 	}
 
 	return nil
+}
+
+// Invert inverse les couleurs de l'image PBM.
+func (pbm *PBM) Invert(){
+	for y := 0; y < pbm.height; y++ {
+		for x := 0; x < pbm.width; x++ {
+			pbm.data[y][x] = !pbm.data[y][x]
+		}
+	}
 }
