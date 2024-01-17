@@ -3,7 +3,7 @@ package Netpbm
 import (
 	"bufio"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -19,48 +19,32 @@ type PBM struct {
 func ReadPBM(filename string) (*PBM, error) {
 	pbm := PBM{}
 
-	// Ouverture du fichier
+	// Open the file
 	file, err := os.Open(filename)
 	if err != nil {
-		fmt.Println(err)
+		return nil, fmt.Errorf("error opening file: %v", err)
 	}
-
-	fileInfo, err := file.Stat()
-	if err != nil {
-		return nil, fmt.Errorf("error getting file info: %v", err)
-	}
-
-	if fileInfo.Size() == 0 {
-		return nil, fmt.Errorf("file %s is empty", filename)
-	}
-
 	defer file.Close()
 
-	// Scanner le texte + variables
+	// Scanner for text-based information
 	scanner := bufio.NewScanner(file)
 	// reader := bufio.NewReader(file)
 	confirmOne := false
 	confirmTwo := false
 	Line := 0
 
-	// Ignorer le #
+	// Ignore comments and empty lines
 	for scanner.Scan() {
-
 		if scanner.Text() == "" {
 			continue
 		}
 
-		if err := scanner.Err(); err != nil {
-			if err != io.EOF {
-				return nil, fmt.Errorf("error reading file: %v", err)
-			}
-		}
 		if strings.HasPrefix(scanner.Text(), "#") {
 			continue
-		} else if !confirmOne { // Prendre en compte le P1 ou P4
+		} else if !confirmOne {
 			pbm.magicNumber = scanner.Text()
 			confirmOne = true
-		} else if !confirmTwo { // Prendre en compte la taille de l'image
+		} else if !confirmTwo {
 			sepa := strings.Fields(scanner.Text())
 			if len(sepa) > 0 {
 				pbm.width, _ = strconv.Atoi(sepa[0])
@@ -68,14 +52,14 @@ func ReadPBM(filename string) (*PBM, error) {
 			}
 			confirmTwo = true
 
-			pbm.data = make(([][]bool), pbm.height) // Création de la matrice pour le data en prenant en compte la taille
+			pbm.data = make([][]bool, pbm.height)
 			for i := range pbm.data {
-				pbm.data[i] = make(([]bool), pbm.width)
+				pbm.data[i] = make([]bool, pbm.width)
 			}
 
 		} else {
-
-			if pbm.magicNumber == "P1" { // Pour le P1 rendre les 0 en false et les 1 en true
+			if pbm.magicNumber == "P1" {
+				// Process P1 format
 				test := strings.Fields(scanner.Text())
 				for i := 0; i < pbm.width; i++ {
 					if test[i] == "1" {
@@ -86,58 +70,40 @@ func ReadPBM(filename string) (*PBM, error) {
 				}
 				Line++
 			} else if pbm.magicNumber == "P4" {
-				// 	// Read P4 format (binary)
-				// 	expectedBytesPerRow := (pbm.width + 7) / 8
-				// 	for y := 0; y < pbm.height; y++ {
-				// 		row := make([]byte, expectedBytesPerRow)
-				// 		n, err := reader.Read(row)
-				// 		if err != nil {
-				// 			if err == io.EOF {
-				// 				return nil, fmt.Errorf("unexpected end of file at row %d", y)
-				// 			}
-				// 			return nil, fmt.Errorf("error reading pixel data at row %d: %v", y, err)
-				// 		}
-				// 		if n < expectedBytesPerRow {
-				// 			return nil, fmt.Errorf("unexpected end of file at row %d, expected %d bytes, got %d", y, expectedBytesPerRow, n)
-				// 		}
+				expectedBytesPerRow := (pbm.width + 7) / 8
+				totalExpectedBytes := expectedBytesPerRow * pbm.height
+				fmt.Printf("Expected total bytes for pixel data: %d\n", totalExpectedBytes)
 
-				// 		for y := 0; y < pbm.height; y++ {
-				// 			for x := 0; x < pbm.width; x++ {
-				// 				byteIndex := x / 8
-				// 				bitIndex := 7 - (x % 8)
+				// Create a buffer to hold all pixel data
+				allPixelData := make([]byte, totalExpectedBytes)
 
-				// 				// Vérifier que byteIndex est dans les limites
-				// 				if byteIndex >= 0 && byteIndex < len(row) {
-				// 					// Convertir le caractère ASCII en valeur décimale
-				// 					decimalValue := int(row[byteIndex])
+				// Read the file content directly into the buffer
+				fileContent, err := ioutil.ReadFile(filename)
+				if err != nil {
+					return nil, fmt.Errorf("error reading file: %v", err)
+				}
 
-				// 					// Vérifier que bitIndex est dans les limites
-				// 					if bitIndex >= 0 && bitIndex < 8 {
-				// 						// Extraire le bit approprié
-				// 						bitValue := (decimalValue >> bitIndex) & 1
+				// Copy the relevant part of the file content into the pixel data buffer
+				copy(allPixelData, fileContent[len(fileContent)-totalExpectedBytes:])
 
-				// 						// Assurez-vous que le tableau pbm.data[y] est correctement dimensionné
-				// 						if y >= 0 && y < len(pbm.data) && x >= 0 && x < len(pbm.data[y]) {
-				// 							pbm.data[y][x] = bitValue != 0
-				// 						} else {
-				// 							fmt.Println("Erreur d'indice de tableau :", x, y)
-				// 						}
-				// 					} else {
-				// 						fmt.Println("Erreur d'indice de bit :", bitIndex)
-				// 					}
-				// 				} else {
-				// 					fmt.Println("Erreur d'indice de byte :", byteIndex)
-				// 				}
-				// 			}
-				// 		}
+				// Process the buffer to update pbm.data
+				byteIndex := 0
+				for y := 0; y < pbm.height; y++ {
+					for x := 0; x < pbm.width; x++ {
+						if x%8 == 0 && x != 0 {
+							byteIndex++
+						}
+						pbm.data[y][x] = (allPixelData[byteIndex]>>(7-(x%8)))&1 != 0
+					}
+					byteIndex++
+				}
 
-				// 	}
 			}
 		}
 	}
 
 	fmt.Printf("%v\n", pbm)
-	return &PBM{pbm.data, pbm.height, pbm.width, pbm.magicNumber}, err // Retourner la struct en entiere
+	return &pbm, nil
 }
 
 // Size retourne la hauteur et la largeur de l'image.
