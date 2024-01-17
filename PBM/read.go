@@ -198,24 +198,16 @@ func (pbm *PBM) Flip() {
 
 // Flop flops the PBM image vertically.
 func (pbm *PBM) Flop() {
-	if pbm.data == nil || len(pbm.data) == 0 {
-        fmt.Println("Flop Error: No data to process.")
-        return
-    }
-
-    for y := 0; y < pbm.height; y++ {
-        if len(pbm.data[y]) != pbm.width {
-            fmt.Printf("Flop Error: Data inconsistency in row %d.\n", y)
-            continue
-        }
-        
-        for x := 0; x < pbm.width/2; x++ {
-            oppositeX := pbm.width - x - 1
-            pbm.data[y][x], pbm.data[y][oppositeX] = pbm.data[y][oppositeX], pbm.data[y][x]
-        }
-    }
-
-    fmt.Println("Flop operation completed successfully.")
+	cursor := pbm.height - 1
+	for y := range pbm.data {
+		temp := pbm.data[y]
+		pbm.data[y] = pbm.data[cursor]
+		pbm.data[cursor] = temp
+		cursor--
+		if cursor < y || cursor == y {
+			break
+		}
+	}
 }
 
 // SetMagicNumber sets the magic number of the PBM image.
