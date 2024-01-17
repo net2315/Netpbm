@@ -1,4 +1,4 @@
-package main
+package Netpbm
 
 import (
 	"bufio"
@@ -24,17 +24,37 @@ func ReadPBM(filename string) (*PBM, error) {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return nil, fmt.Errorf("error getting file info: %v", err)
+	}
+
+	if fileInfo.Size() == 0 {
+		return nil, fmt.Errorf("file %s is empty", filename)
+	}
+
 	defer file.Close()
 
 	// Scanner le texte + variables
 	scanner := bufio.NewScanner(file)
-	reader := bufio.NewReader(file)
+	// reader := bufio.NewReader(file)
 	confirmOne := false
 	confirmTwo := false
 	Line := 0
 
 	// Ignorer le #
 	for scanner.Scan() {
+
+		if scanner.Text() == "" {
+			continue
+		}
+
+		if err := scanner.Err(); err != nil {
+			if err != io.EOF {
+				return nil, fmt.Errorf("error reading file: %v", err)
+			}
+		}
 		if strings.HasPrefix(scanner.Text(), "#") {
 			continue
 		} else if !confirmOne { // Prendre en compte le P1 ou P4
@@ -55,7 +75,7 @@ func ReadPBM(filename string) (*PBM, error) {
 
 		} else {
 
-			if pbm.magicNumber == "P1" { 				// Pour le P1 rendre les 0 en false et les 1 en true
+			if pbm.magicNumber == "P1" { // Pour le P1 rendre les 0 en false et les 1 en true
 				test := strings.Fields(scanner.Text())
 				for i := 0; i < pbm.width; i++ {
 					if test[i] == "1" {
@@ -65,33 +85,53 @@ func ReadPBM(filename string) (*PBM, error) {
 					}
 				}
 				Line++
-			}else if pbm.magicNumber == "P4" {
-				// Read P4 format (binary)
-				expectedBytesPerRow := (pbm.width + 7) / 8
-				for y := 0; y < pbm.height; y++ {
-					row := make([]byte, expectedBytesPerRow)
-					n, err := reader.Read(row)
-					if err != nil {
-						if err == io.EOF {
-							return nil, fmt.Errorf("unexpected end of file at row %d", y)
-						}
-						return nil, fmt.Errorf("error reading pixel data at row %d: %v", y, err)
-					}
-					if n < expectedBytesPerRow {
-						return nil, fmt.Errorf("unexpected end of file at row %d, expected %d bytes, got %d", y, expectedBytesPerRow, n)
-					}
-		
-					for x := 0; x < pbm.width; x++ {
-						byteIndex := x / 8
-						bitIndex := 7 - (x % 8)
-		
-						// Convert ASCII to decimal and extract the bit
-						decimalValue := int(row[byteIndex])
-						bitValue := (decimalValue >> bitIndex) & 1
-		
-						pbm.data[y][x] = bitValue != 0
-					}
-				}
+			} else if pbm.magicNumber == "P4" {
+				// 	// Read P4 format (binary)
+				// 	expectedBytesPerRow := (pbm.width + 7) / 8
+				// 	for y := 0; y < pbm.height; y++ {
+				// 		row := make([]byte, expectedBytesPerRow)
+				// 		n, err := reader.Read(row)
+				// 		if err != nil {
+				// 			if err == io.EOF {
+				// 				return nil, fmt.Errorf("unexpected end of file at row %d", y)
+				// 			}
+				// 			return nil, fmt.Errorf("error reading pixel data at row %d: %v", y, err)
+				// 		}
+				// 		if n < expectedBytesPerRow {
+				// 			return nil, fmt.Errorf("unexpected end of file at row %d, expected %d bytes, got %d", y, expectedBytesPerRow, n)
+				// 		}
+
+				// 		for y := 0; y < pbm.height; y++ {
+				// 			for x := 0; x < pbm.width; x++ {
+				// 				byteIndex := x / 8
+				// 				bitIndex := 7 - (x % 8)
+
+				// 				// Vérifier que byteIndex est dans les limites
+				// 				if byteIndex >= 0 && byteIndex < len(row) {
+				// 					// Convertir le caractère ASCII en valeur décimale
+				// 					decimalValue := int(row[byteIndex])
+
+				// 					// Vérifier que bitIndex est dans les limites
+				// 					if bitIndex >= 0 && bitIndex < 8 {
+				// 						// Extraire le bit approprié
+				// 						bitValue := (decimalValue >> bitIndex) & 1
+
+				// 						// Assurez-vous que le tableau pbm.data[y] est correctement dimensionné
+				// 						if y >= 0 && y < len(pbm.data) && x >= 0 && x < len(pbm.data[y]) {
+				// 							pbm.data[y][x] = bitValue != 0
+				// 						} else {
+				// 							fmt.Println("Erreur d'indice de tableau :", x, y)
+				// 						}
+				// 					} else {
+				// 						fmt.Println("Erreur d'indice de bit :", bitIndex)
+				// 					}
+				// 				} else {
+				// 					fmt.Println("Erreur d'indice de byte :", byteIndex)
+				// 				}
+				// 			}
+				// 		}
+
+				// 	}
 			}
 		}
 	}
@@ -130,7 +170,7 @@ func (pbm *PBM) Save(filename string) error {
 	}
 
 	// Entrer les donnees de l'image
-	if pbm.magicNumber == "P1" { 												//Pour le P1 
+	if pbm.magicNumber == "P1" { //Pour le P1
 		for _, row := range pbm.data {
 			for _, pixel := range row {
 				if pixel {
@@ -147,7 +187,7 @@ func (pbm *PBM) Save(filename string) error {
 				return fmt.Errorf("error writing pixel data: %v", err)
 			}
 		}
-	} else if pbm.magicNumber == "P4" { 										// Pour le P4
+	} else if pbm.magicNumber == "P4" { // Pour le P4
 		for _, row := range pbm.data {
 			for x := 0; x < pbm.width; x += 8 {
 				var byteValue byte
@@ -169,10 +209,40 @@ func (pbm *PBM) Save(filename string) error {
 }
 
 // Invert inverse les couleurs de l'image PBM.
-func (pbm *PBM) Invert(){
+func (pbm *PBM) Invert() {
 	for y := 0; y < pbm.height; y++ {
 		for x := 0; x < pbm.width; x++ {
 			pbm.data[y][x] = !pbm.data[y][x]
 		}
 	}
+}
+
+// Flip flips the PBM image horizontally.
+func (pbm *PBM) Flip() {
+	for y := 0; y < pbm.height; y++ {
+		start := make([]bool, pbm.width)
+		end := make([]bool, pbm.width)
+		copy(start, pbm.data[y])
+		for i := 0; i < len(start); i++ {
+			end[i] = start[len(start)-1-i]
+		}
+		copy(pbm.data[y], end[:])
+
+	}
+}
+
+// Flop flops the PBM image vertically.
+func (pbm *PBM) Flop() {
+	for y := 0; y < pbm.height; y++ {
+		// Reverse the order of elements in each row
+		for start, end := 0, pbm.width-1; start < end; start, end = start+1, end-1 {
+			pbm.data[y][start], pbm.data[y][end] = pbm.data[y][end], pbm.data[y][start]
+		}
+	}
+}
+
+// SetMagicNumber sets the magic number of the PBM image.
+func (pbm *PBM) SetMagicNumber(magicNumber string) {
+	pbm.magicNumber = magicNumber
+
 }
