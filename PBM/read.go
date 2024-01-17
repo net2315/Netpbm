@@ -3,7 +3,6 @@ package Netpbm
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -78,7 +77,7 @@ func ReadPBM(filename string) (*PBM, error) {
 				allPixelData := make([]byte, totalExpectedBytes)
 
 				// Read the file content directly into the buffer
-				fileContent, err := ioutil.ReadFile(filename)
+				fileContent, err := os.ReadFile(filename)
 				if err != nil {
 					return nil, fmt.Errorf("error reading file: %v", err)
 				}
@@ -199,12 +198,24 @@ func (pbm *PBM) Flip() {
 
 // Flop flops the PBM image vertically.
 func (pbm *PBM) Flop() {
-	for y := 0; y < pbm.height; y++ {
-		// Reverse the order of elements in each row
-		for start, end := 0, pbm.width-1; start < end; start, end = start+1, end-1 {
-			pbm.data[y][start], pbm.data[y][end] = pbm.data[y][end], pbm.data[y][start]
-		}
-	}
+	if pbm.data == nil || len(pbm.data) == 0 {
+        fmt.Println("Flop Error: No data to process.")
+        return
+    }
+
+    for y := 0; y < pbm.height; y++ {
+        if len(pbm.data[y]) != pbm.width {
+            fmt.Printf("Flop Error: Data inconsistency in row %d.\n", y)
+            continue
+        }
+        
+        for x := 0; x < pbm.width/2; x++ {
+            oppositeX := pbm.width - x - 1
+            pbm.data[y][x], pbm.data[y][oppositeX] = pbm.data[y][oppositeX], pbm.data[y][x]
+        }
+    }
+
+    fmt.Println("Flop operation completed successfully.")
 }
 
 // SetMagicNumber sets the magic number of the PBM image.
