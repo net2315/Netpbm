@@ -1,0 +1,69 @@
+//// ia after variables
+// // Get magic number
+	// scanner.Scan()
+	// pgm.magicNumber = scanner.Text()
+	// if pgm.magicNumber != "P5" && pgm.magicNumber != "P2" {
+	// 	return nil, fmt.Errorf("invalid magic number: %s", pgm.magicNumber)
+	// }
+
+	// // Get dimensions
+	// scanner.Scan()
+	// dimensions := strings.Fields(scanner.Text())
+	// if len(dimensions) != 2 {
+	// 	return nil, errors.New("bad input format")
+	// }
+	// pgm.width, _ = strconv.Atoi(dimensions[0])
+	// pgm.height, _ = strconv.Atoi(dimensions[1])
+
+
+// Check for valid values
+		if pgm.width <= 0 || pgm.height <= 0 {
+			return nil, fmt.Errorf("invalid size: %d x %d", pgm.width, pgm.height)
+		}
+
+		// Get max value
+		scanner.Scan()
+		maxValue, err := strconv.Atoi(scanner.Text())
+		
+		pgm.max = uint(maxValue)
+
+		// Move to the beginning of binary data
+		for scanner.Scan() {
+			if scanner.Text() == "" || strings.HasPrefix(scanner.Text(), "#") {
+				continue
+			} else {
+				break
+			}
+		} 
+
+
+//// before confirm three
+pgm.data = make([][]bool, pgm.height)
+			for i := range pgm.data {
+				pgm.data[i] = make([]bool, pgm.width)
+			}
+
+//// after confirm three
+
+// Check for valid values
+if pgm.width <= 0 || pgm.height <= 0 {
+	return nil, fmt.Errorf("invalid size: %d x %d", pgm.width, pgm.height)
+}
+
+// Get max value
+scanner.Scan()
+maxValue, err := strconv.Atoi(scanner.Text())
+if err != nil {
+	return nil, fmt.Errorf("error parsing max value: %v", err)
+}
+pgm.max = uint(maxValue)
+
+// Move to the beginning of binary data
+for scanner.Scan() {
+	if scanner.Text() == "" || strings.HasPrefix(scanner.Text(), "#") {
+		continue
+	} else {
+		break
+	}
+}
+

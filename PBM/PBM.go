@@ -14,7 +14,7 @@ type PBM struct {
 	magicNumber   string
 }
 
-// ReadPBM lie l'image PBM du fichier et retourne dans la struct avec les infos de l'image.
+// ReadPGM reads a PGM image from a file and returns a struct that represents the image.
 func ReadPBM(filename string) (*PBM, error) {
 	pbm := PBM{}
 
