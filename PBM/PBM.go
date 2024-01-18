@@ -55,7 +55,7 @@ func ReadPBM(filename string) (*PBM, error) {
 			for i := range pbm.data {
 				pbm.data[i] = make([]bool, pbm.width)
 			}
-
+			
 		} else {
 			if pbm.magicNumber == "P1" {
 				// Process P1 format
@@ -96,7 +96,6 @@ func ReadPBM(filename string) (*PBM, error) {
 					}
 					byteIndex++
 				}
-
 			}
 		}
 	}
