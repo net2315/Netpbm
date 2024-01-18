@@ -4,7 +4,7 @@ type PGM struct{
     data [][]uint8
     width, height int
     magicNumber string
-    max int
+    max uint
 }
 
 // ReadPGM reads a PGM image from a file and returns a struct that represents the image.
