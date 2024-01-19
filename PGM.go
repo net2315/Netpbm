@@ -46,6 +46,7 @@ func ReadPGM(filename string) (*PGM, error) {
     }
     pgm.width, _ = strconv.Atoi(sepa[0])
     pgm.height, _ = strconv.Atoi(sepa[1])
+    
     // Check for valid values
     if pgm.width <= 0 || pgm.height <= 0 {
         return nil, fmt.Errorf("invalid size: %d x %d", pgm.width, pgm.height)
