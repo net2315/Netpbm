@@ -232,7 +232,7 @@ func (pgm *PGM) ToPBM() *PBM{
 	for y := 0; y < pgm.height; y++ {
 		pbmData[y] = make([]bool, pgm.width)
 		for x := 0; x < pgm.width; x++ {
-			pbmData[y][x] = pgm.data[y][x] > uint8(pgm.max/2)
+			pbmData[y][x] = pgm.data[y][x] < uint8(pgm.max/2)
 		}
 	}
 
