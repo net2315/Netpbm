@@ -2,7 +2,6 @@ package Netpbm
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	// "io"
 	"os"
@@ -21,98 +20,76 @@ type PGM struct {
 func ReadPGM(filename string) (*PGM, error) {
 	pgm := PGM{}
 
-    // Open the file
-    file, err := os.Open(filename)
-    if err != nil {
-        return nil, fmt.Errorf("error opening file: %v", err)
-    }
-    defer file.Close()
+	// Open the file
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, fmt.Errorf("error opening file: %v", err)
+	}
+	defer file.Close()
 
-    // Scanner for text-based information
-    scanner := bufio.NewScanner(file)
+	// Scanner for text-based information
+	scanner := bufio.NewScanner(file)
 
-    // Get magic number
-    scanner.Scan()
-    pgm.magicNumber = scanner.Text()
-    if pgm.magicNumber != "P5" && pgm.magicNumber != "P2" {
-        return nil, fmt.Errorf("invalid magic number: %s", pgm.magicNumber)
-    }
+	// Get magic number
+	scanner.Scan()
+	pgm.magicNumber = scanner.Text()
 
-    // Get dimensions
-    scanner.Scan()
-    sepa := strings.Fields(scanner.Text())
-    if len(sepa) != 2 {
-        return nil, errors.New("bad input format")
-    }
-    pgm.width, _ = strconv.Atoi(sepa[0])
-    pgm.height, _ = strconv.Atoi(sepa[1])
-    
-    // Check for valid values
-    if pgm.width <= 0 || pgm.height <= 0 {
-        return nil, fmt.Errorf("invalid size: %d x %d", pgm.width, pgm.height)
-    }
+	// Get dimensions
+	scanner.Scan()
+	sepa := strings.Fields(scanner.Text())
+	pgm.width, _ = strconv.Atoi(sepa[0])
+	pgm.height, _ = strconv.Atoi(sepa[1])
 
-    // Get max value
-    scanner.Scan()
-    maxValue, err := strconv.Atoi(scanner.Text())
-    if err != nil {
-        return nil, fmt.Errorf("error parsing max value: %v", err)
-    }
-    pgm.max = uint8(maxValue)
+	// Check for valid values
+	if pgm.width <= 0 || pgm.height <= 0 {
+		return nil, fmt.Errorf("invalid size: %d x %d", pgm.width, pgm.height)
+	}
 
-    // Move to the beginning of binary data
-    for scanner.Scan() {
-        if scanner.Text() == "" || strings.HasPrefix(scanner.Text(), "#") {
-            continue
-        } else {
-            break
-        }
-    }
+	// Get max value
+	scanner.Scan()
+	maxValue, _ := strconv.Atoi(scanner.Text())
+	pgm.max = uint8(maxValue)
 
-    // P5 format (raw binary)
-    if pgm.magicNumber == "P5" {
-    //     buffer := make([]byte, pgm.width*pgm.height)
+	// Ignore comments and empty lines
+	for scanner.Scan() {
+		if scanner.Text() == "" || strings.HasPrefix(scanner.Text(), "#") {
+			continue
+		} else {
+			break
+		}
+	}
 
-    //     // Read the binary data directly into the buffer
-    //     _, err := file.Read(buffer)
-    //     if err != nil {
-    //         return nil, fmt.Errorf("error reading binary data: %v", err)
-    //     }
+	// make matrice for data
+	pgm.data = make([][]uint8, pgm.height)
+	for i := 0; i < pgm.height; i++ {
+		pgm.data[i] = make([]uint8, pgm.width)
+		lineValues := strings.Fields(scanner.Text())
 
-    //     // Populate pgm.data with the binary data
-    //     pgm.data = make([][]uint8, pgm.height)
-    //     for i := 0; i < pgm.height; i++ {
-    //         pgm.data[i] = make([]uint8, pgm.width)
-    //         for j := 0; j < pgm.width; j++ {
-    //             pgm.data[i][j] = buffer[i*pgm.width+j]
-    //         }
-    //     }
-    } else if pgm.magicNumber == "P2" {
-        // P2 format (ASCII)
-        pgm.data = make([][]uint8, pgm.height)
-        for i := 0; i < pgm.height; i++ {
-            pgm.data[i] = make([]uint8, pgm.width)
-            lineValues := strings.Fields(scanner.Text())
-            if len(lineValues) != pgm.width {
-                return nil, fmt.Errorf("bad row length: %d", len(lineValues))
-            }
-            for j := 0; j < pgm.width; j++ {
-                value, err := strconv.Atoi(lineValues[j])
-                if err != nil {
-                    return nil, fmt.Errorf("error reading pixel value: %v", err)
-                }
-                pgm.data[i][j] = uint8(value)
-            }
-            if !scanner.Scan() {
-                break // Break if there are no more lines
-            }
-        }
-    } else {
-        // Handle other PGM formats here if needed
-        return nil, fmt.Errorf("unsupported PGM format: %s", pgm.magicNumber)
-    }
-
-    return &pgm, nil
+		// P5 format (raw binary)
+		if pgm.magicNumber == "P5" {
+			//     buffer := make([]byte, pgm.width*pgm.height)
+			//     // Read the binary data directly into the buffer
+			//     _, err := file.Read(buffer)
+			//     if err != nil {
+			//         return nil, fmt.Errorf("error reading binary data: %v", err)
+			//     }
+			//     // Populate pgm.data with the binary data
+			//     pgm.data = make([][]uint8, pgm.height)
+			//     for i := 0; i < pgm.height; i++ {
+			//         pgm.data[i] = make([]uint8, pgm.width)
+			//         for j := 0; j < pgm.width; j++ {
+			//             pgm.data[i][j] = buffer[i*pgm.width+j]
+			//         }
+			//     }
+		} else if pgm.magicNumber == "P2" {
+			// P2 format (ASCII)
+			for j := 0; j < pgm.width; j++ {
+				value, _ := strconv.Atoi(lineValues[j])
+				pgm.data[i][j] = uint8(value)
+			}
+		}
+	}
+	return &pgm, nil
 }
 
 // Size returns the width and height of the image.
@@ -174,12 +151,12 @@ func (pgm *PGM) Flip() {
 }
 
 // Flop flops the PGM image vertically.
-func (pgm *PGM) Flop(){
-     // Flop the rows vertically
-	 for i, j := 0, pgm.height-1; i < j; i, j = i+1, j-1 {
-        // Swap rows
-        pgm.data[i], pgm.data[j] = pgm.data[j], pgm.data[i]
-    }
+func (pgm *PGM) Flop() {
+	// Flop the rows vertically
+	for i, j := 0, pgm.height-1; i < j; i, j = i+1, j-1 {
+		// Swap rows
+		pgm.data[i], pgm.data[j] = pgm.data[j], pgm.data[i]
+	}
 }
 
 // SetMagicNumber sets the magic number of the PGM image.
@@ -188,48 +165,48 @@ func (pgm *PGM) SetMagicNumber(magicNumber string) {
 }
 
 // SetMaxValue sets the max value of the PGM image.
-func (pgm *PGM) SetMaxValue(maxValue uint8){
+func (pgm *PGM) SetMaxValue(maxValue uint8) {
 	for y := range pgm.data {
-        for x := range pgm.data[y] {
-            prevvalue := pgm.data[y][x];
-            newvalue := prevvalue*uint8(5)/pgm.max
-            pgm.data[y][x] = newvalue;
-        }
-    }
-    pgm.max = maxValue;
+		for x := range pgm.data[y] {
+			prevvalue := pgm.data[y][x]
+			newvalue := prevvalue * uint8(5) / pgm.max
+			pgm.data[y][x] = newvalue
+		}
+	}
+	pgm.max = maxValue
 }
 
 // Rotate90CW rotates the PGM image 90° clockwise.
-func (pgm *PGM) Rotate90CW(){
-    // Create a new PGM image with swapped width and height
-    rotatedPgm := &PGM{
-        width:  pgm.height,
-        height: pgm.width,
-        max:    pgm.max,
-        magicNumber: pgm.magicNumber,
-        data:   make([][]uint8, pgm.width),
-    }
+func (pgm *PGM) Rotate90CW() {
+	// Create a new PGM image with swapped width and height
+	rotatedPgm := &PGM{
+		width:       pgm.height,
+		height:      pgm.width,
+		max:         pgm.max,
+		magicNumber: pgm.magicNumber,
+		data:        make([][]uint8, pgm.width),
+	}
 
-    // Initialize the data array for the rotated image
-    for i := 0; i < rotatedPgm.width; i++ {
-        rotatedPgm.data[i] = make([]uint8, rotatedPgm.height)
-    }
+	// Initialize the data array for the rotated image
+	for i := 0; i < rotatedPgm.width; i++ {
+		rotatedPgm.data[i] = make([]uint8, rotatedPgm.height)
+	}
 
-    // Populate the rotated image data
-    for i := 0; i < pgm.height; i++ {
-        for j := 0; j < pgm.width; j++ {
-            rotatedPgm.data[j][pgm.height-1-i] = pgm.data[i][j]
-        }
-    }
+	// Populate the rotated image data
+	for i := 0; i < pgm.height; i++ {
+		for j := 0; j < pgm.width; j++ {
+			rotatedPgm.data[j][pgm.height-1-i] = pgm.data[i][j]
+		}
+	}
 
-    // Update the original image with the rotated values
-    pgm.width, pgm.height = rotatedPgm.width, rotatedPgm.height
-    pgm.data = rotatedPgm.data
+	// Update the original image with the rotated values
+	pgm.width, pgm.height = rotatedPgm.width, rotatedPgm.height
+	pgm.data = rotatedPgm.data
 }
 
 // ToPBM converts the PGM image to PBM.
-func (pgm *PGM) ToPBM() *PBM{
-    pbmData := make([][]bool, pgm.height)
+func (pgm *PGM) ToPBM() *PBM {
+	pbmData := make([][]bool, pgm.height)
 	for y := 0; y < pgm.height; y++ {
 		pbmData[y] = make([]bool, pgm.width)
 		for x := 0; x < pgm.width; x++ {

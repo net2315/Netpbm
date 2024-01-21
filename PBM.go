@@ -123,6 +123,7 @@ func (pbm *PBM) Set(x, y int, value bool) {
 
 // Save saves the PBM image to a file and returns an error if there was a problem.
 func (pbm *PBM) Save(filename string) error {
+	// Open the file for writing
 	file, err := os.Create(filename)
 	if err != nil {
 		return fmt.Errorf("error creating file: %v", err)
