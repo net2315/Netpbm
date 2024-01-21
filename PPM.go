@@ -21,15 +21,17 @@ type Pixel struct {
 
 // ReadPPM reads a PPM image from a file and returns a struct that represents the image.
 func ReadPPM(fileName string) (*PPM, error) {
+	// Open the file
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
+	// Reader for text-based information
 	reader := bufio.NewReader(file)
 
-	// Get the magic number
+	// Get magic number
 	magicNumber, err := reader.ReadString('\n')
 	if err != nil {
 		return nil, fmt.Errorf("error reading the magic number: %v", err)
@@ -47,11 +49,8 @@ func ReadPPM(fileName string) (*PPM, error) {
 		return nil, fmt.Errorf("invalid dimensions: %v", err)
 	}
 
-	// Get the maximum value
-	maxValue, err := reader.ReadString('\n')
-	if err != nil {
-		return nil, fmt.Errorf("error reading the maximum value: %v", err)
-	}
+	// Get max value
+	maxValue,_ := reader.ReadString('\n')
 	maxValue = strings.TrimSpace(maxValue)
 	var max uint8
 	_, err = fmt.Sscanf(maxValue, "%d", &max)
@@ -59,7 +58,7 @@ func ReadPPM(fileName string) (*PPM, error) {
 		return nil, fmt.Errorf("invalid maximum value: %v", err)
 	}
 
-	// Get image data
+	// Make matrice for data
 	data := make([][]Pixel, height)
 	expectedBytesPerPixel := 3
 
@@ -142,6 +141,7 @@ func (ppm *PPM) Set(x, y int, value Pixel) {
 
 // Save saves the PPM image to a file and returns an error if there was a problem.
 func (ppm *PPM) Save(filename string) error {
+	// Open the file for writing
 	file, err := os.Create(filename)
 	if err != nil {
 		return fmt.Errorf("error creating file: %v", err)
@@ -273,7 +273,7 @@ func (ppm *PPM) Rotate90CW(){
 }
 
 // ToPGM converts the PPM image to PGM.
-func (ppm *PPM) ToPGM() *PGM{
+func (ppm *PPM) ToPGM() *PGM {
 	// Create a new PGM image with the same dimensions
     pgm := &PGM{
 		width:       ppm.width,
@@ -282,8 +282,7 @@ func (ppm *PPM) ToPGM() *PGM{
 		max:         uint8(ppm.max),
 	}
 
-	    // Initialize the data for the new PGM image
-
+	// Initialize the data for the new PGM image
 	pgm.data = make([][]uint8, ppm.height)
 	for i := range pgm.data {
 		pgm.data[i] = make([]uint8, ppm.width)
