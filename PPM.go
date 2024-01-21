@@ -50,7 +50,7 @@ func ReadPPM(fileName string) (*PPM, error) {
 	}
 
 	// Get max value
-	maxValue,_ := reader.ReadString('\n')
+	maxValue, _ := reader.ReadString('\n')
 	maxValue = strings.TrimSpace(maxValue)
 	var max uint8
 	_, err = fmt.Sscanf(maxValue, "%d", &max)
@@ -243,39 +243,39 @@ func (ppm *PPM) SetMaxValue(maxValue uint8) {
 }
 
 // Rotate90CW rotates the PPM image 90° clockwise.
-func (ppm *PPM) Rotate90CW(){
-    // Create a new PPM image with swapped dimensions
-    newWidth, newHeight := ppm.height, ppm.width
-    rotatedImage := &PPM{
-        data:        make([][]Pixel, newHeight),
-        width:       newWidth,
-        height:      newHeight,
-        magicNumber: ppm.magicNumber,
-        max:         ppm.max,
-    }
+func (ppm *PPM) Rotate90CW() {
+	// Create a new PPM image with swapped dimensions
+	newWidth, newHeight := ppm.height, ppm.width
+	rotatedImage := &PPM{
+		data:        make([][]Pixel, newHeight),
+		width:       newWidth,
+		height:      newHeight,
+		magicNumber: ppm.magicNumber,
+		max:         ppm.max,
+	}
 
-    // Initialize the data for the new PPM image
-    for i := 0; i < newHeight; i++ {
-        rotatedImage.data[i] = make([]Pixel, newWidth)
-    }
+	// Initialize the data for the new PPM image
+	for i := 0; i < newHeight; i++ {
+		rotatedImage.data[i] = make([]Pixel, newWidth)
+	}
 
-    // Copy pixels in a rotated manner
-    for y := 0; y < ppm.height; y++ {
-        for x := 0; x < ppm.width; x++ {
-            rotatedImage.data[x][ppm.height-y-1] = ppm.data[y][x]
-        }
-    }
+	// Copy pixels in a rotated manner
+	for y := 0; y < ppm.height; y++ {
+		for x := 0; x < ppm.width; x++ {
+			rotatedImage.data[x][ppm.height-y-1] = ppm.data[y][x]
+		}
+	}
 
-    // Update the original PPM image with the rotated one
-    ppm.data = rotatedImage.data
-    ppm.width = rotatedImage.width
-    ppm.height = rotatedImage.height
+	// Update the original PPM image with the rotated one
+	ppm.data = rotatedImage.data
+	ppm.width = rotatedImage.width
+	ppm.height = rotatedImage.height
 }
 
 // ToPGM converts the PPM image to PGM.
 func (ppm *PPM) ToPGM() *PGM {
 	// Create a new PGM image with the same dimensions
-    pgm := &PGM{
+	pgm := &PGM{
 		width:       ppm.width,
 		height:      ppm.height,
 		magicNumber: "P2",
@@ -288,7 +288,7 @@ func (ppm *PPM) ToPGM() *PGM {
 		pgm.data[i] = make([]uint8, ppm.width)
 	}
 
-    // Convert RGB to grayscale and copy the pixel values
+	// Convert RGB to grayscale and copy the pixel values
 	for y := 0; y < ppm.height; y++ {
 		for x := 0; x < ppm.width; x++ {
 			// Convert RGB to grayscale
@@ -302,34 +302,34 @@ func (ppm *PPM) ToPGM() *PGM {
 
 // ToPBM converts the PPM image to PBM.
 func (ppm *PPM) ToPBM() *PBM {
-    // Create a new PBM image with the same dimensions
-    pbm := &PBM{
-        width:       ppm.width,
-        height:      ppm.height,
-        magicNumber: "P1",
-    }
+	// Create a new PBM image with the same dimensions
+	pbm := &PBM{
+		width:       ppm.width,
+		height:      ppm.height,
+		magicNumber: "P1",
+	}
 
-    // Initialize the data for the new PBM image
-    pbm.data = make([][]bool, ppm.height)
-    for i := range pbm.data {
-        pbm.data[i] = make([]bool, ppm.width)
-    }
+	// Initialize the data for the new PBM image
+	pbm.data = make([][]bool, ppm.height)
+	for i := range pbm.data {
+		pbm.data[i] = make([]bool, ppm.width)
+	}
 
-    // Define a threshold for converting color to monochrome
-    threshold := uint8(ppm.max / 2)
+	// Define a threshold for converting color to monochrome
+	threshold := uint8(ppm.max / 2)
 
-    // Convert each pixel to monochrome based on average intensity
-    for y := 0; y < ppm.height; y++ {
-        for x := 0; x < ppm.width; x++ {
-            // Calculate the average intensity using RGB values
-            average := (uint16(ppm.data[y][x].R) + uint16(ppm.data[y][x].G) + uint16(ppm.data[y][x].B)) / 3
-            pbm.data[y][x] = average < uint16(threshold)
-        }
-    }
+	// Convert each pixel to monochrome based on average intensity
+	for y := 0; y < ppm.height; y++ {
+		for x := 0; x < ppm.width; x++ {
+			// Calculate the average intensity using RGB values
+			average := (uint16(ppm.data[y][x].R) + uint16(ppm.data[y][x].G) + uint16(ppm.data[y][x].B)) / 3
+			pbm.data[y][x] = average < uint16(threshold)
+		}
+	}
 
-    return pbm
+	return pbm
 }
 
-type Point struct{
-    X, Y int
+type Point struct {
+	X, Y int
 }
