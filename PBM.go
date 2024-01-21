@@ -154,6 +154,7 @@ func (pbm *PBM) Save(filename string) error {
 				return fmt.Errorf("error writing pixel data: %v", err)
 			}
 		}
+		
 	} else if pbm.magicNumber == "P4" { // For the P4
 		for _, row := range pbm.data {
 			for x := 0; x < pbm.width; x += 8 {

@@ -82,6 +82,7 @@ func ReadPGM(filename string) (*PGM, error) {
 			//         }
 			//     }
 		} else if pgm.magicNumber == "P2" {
+			
 			// P2 format (ASCII)
 			for j := 0; j < pgm.width; j++ {
 				value, _ := strconv.Atoi(lineValues[j])

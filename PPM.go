@@ -43,6 +43,7 @@ func ReadPPM(fileName string) (*PPM, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error with dimensions: %v", err)
 	}
+
 	var width, height int
 	_, err = fmt.Sscanf(strings.TrimSpace(sepa), "%d %d", &width, &height)
 	if err != nil {
@@ -55,6 +56,7 @@ func ReadPPM(fileName string) (*PPM, error) {
 		return nil, fmt.Errorf("error reading the maximum value: %v", err)
 	}
 	maxValue = strings.TrimSpace(maxValue)
+	
 	var max uint8
 	_, err = fmt.Sscanf(maxValue, "%d", &max)
 	if err != nil {
