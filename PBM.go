@@ -27,7 +27,6 @@ func ReadPBM(filename string) (*PBM, error) {
 
 	// Scanner for text-based information
 	scanner := bufio.NewScanner(file)
-	// reader := bufio.NewReader(file)
 	confirmOne := false
 	confirmTwo := false
 	Line := 0
@@ -41,21 +40,23 @@ func ReadPBM(filename string) (*PBM, error) {
 		if strings.HasPrefix(scanner.Text(), "#") {
 			continue
 		} else if !confirmOne {
+			// Get magic number
 			pbm.magicNumber = scanner.Text()
 			confirmOne = true
 		} else if !confirmTwo {
+			// Get dimensions
 			sepa := strings.Fields(scanner.Text())
 			if len(sepa) > 0 {
 				pbm.width, _ = strconv.Atoi(sepa[0])
 				pbm.height, _ = strconv.Atoi(sepa[1])
 			}
 			confirmTwo = true
-
+			// make matrice for data
 			pbm.data = make([][]bool, pbm.height)
 			for i := range pbm.data {
 				pbm.data[i] = make([]bool, pbm.width)
 			}
-			
+
 		} else {
 			if pbm.magicNumber == "P1" {
 				// Process P1 format
@@ -69,6 +70,7 @@ func ReadPBM(filename string) (*PBM, error) {
 				}
 				Line++
 			} else if pbm.magicNumber == "P4" {
+				// Process P4 format
 				expectedBytesPerRow := (pbm.width + 7) / 8
 				totalExpectedBytes := expectedBytesPerRow * pbm.height
 				fmt.Printf("Expected total bytes for pixel data: %d\n", totalExpectedBytes)
@@ -104,17 +106,17 @@ func ReadPBM(filename string) (*PBM, error) {
 	return &pbm, nil
 }
 
-// Size retourne la hauteur et la largeur de l'image.
+// Size returns the width and height of the image.
 func (pbm *PBM) Size() (int, int) {
 	return pbm.height, pbm.width
 }
 
-// At retourne la valeur de chaque pixel en (x, y).
+// At returns the value of the pixel at (x, y).
 func (pbm *PBM) At(x, y int) bool {
 	return pbm.data[x][y]
 }
 
-// Set défini la valeur de chaque pixel à (x, y).
+// Set sets the value of the pixel at (x, y).
 func (pbm *PBM) Set(x, y int, value bool) {
 	pbm.data[x][y] = value
 }
@@ -127,14 +129,14 @@ func (pbm *PBM) Save(filename string) error {
 	}
 	defer file.Close()
 
-	// Ecrire le magique number et la taille de l'image dans le nouveau fichier
+	// Write the magic number and the size of the image in the new file
 	_, err = fmt.Fprintf(file, "%s\n%d %d\n", pbm.magicNumber, pbm.width, pbm.height)
 	if err != nil {
 		return fmt.Errorf("error writing magic number and dimensions: %v", err)
 	}
 
-	// Entrer les donnees de l'image
-	if pbm.magicNumber == "P1" { //Pour le P1
+	// Enter image data
+	if pbm.magicNumber == "P1" { // For the P1
 		for _, row := range pbm.data {
 			for _, pixel := range row {
 				if pixel {
@@ -151,7 +153,7 @@ func (pbm *PBM) Save(filename string) error {
 				return fmt.Errorf("error writing pixel data: %v", err)
 			}
 		}
-	} else if pbm.magicNumber == "P4" { // Pour le P4
+	} else if pbm.magicNumber == "P4" { // For the P4
 		for _, row := range pbm.data {
 			for x := 0; x < pbm.width; x += 8 {
 				var byteValue byte
